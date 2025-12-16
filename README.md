@@ -1,5 +1,7 @@
 # Multi-modal AI Framework for Robotic Task Automation
 
+![Multi-modal AI Framework Banner](assets/banner.png)
+
 [![ROS2](https://img.shields.io/badge/ROS2-Humble-blue)](https://docs.ros.org/en/humble/)
 [![Python](https://img.shields.io/badge/Python-3.10+-green)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-brightgreen)](https://www.docker.com/)
@@ -39,7 +41,7 @@ This framework enables robots to understand and execute natural language command
 ```
 Natural Language Command
         ↓
-   RoboLingua Core
+   Multi-modal AI Framework Core
    ├── Vision Module (CLIP)
    ├── Language Module (GPT-3.5)
    └── RAG Module (ChromaDB)

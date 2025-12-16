@@ -40,13 +40,13 @@ RUN mkdir -p /root/ros2_ws/src
 WORKDIR /root/ros2_ws
 
 # Copy AI Agent Framework
-COPY . /root/ros2_ws/src/robolingua/
+COPY . /root/ros2_ws/src/ai-framework/
 
 # Install Python dependencies
-RUN pip3 install --no-cache-dir -r /root/ros2_ws/src/robolingua/requirements.txt
+RUN pip3 install --no-cache-dir -r /root/ros2_ws/src/ai-framework/requirements.txt
 
 # Create symbolic link for ROS package
-RUN ln -s /root/ros2_ws/src/robolingua/ros_integration /root/ros2_ws/src/ai_agent_ros
+RUN ln -s /root/ros2_ws/src/ai-framework/ros_integration /root/ros2_ws/src/ai_agent_ros
 
 # Initialize rosdep (if not already initialized)
 RUN rosdep update || true
