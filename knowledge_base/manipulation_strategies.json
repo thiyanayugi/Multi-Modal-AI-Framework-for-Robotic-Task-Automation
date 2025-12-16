@@ -1,0 +1,77 @@
+[
+  {
+    "content": "When grasping cubic blocks, approach from directly above with the gripper aligned vertically. Use 50% grip force to avoid crushing while maintaining secure hold.",
+    "metadata": {
+      "category": "grasping",
+      "object_type": "block",
+      "difficulty": "basic"
+    }
+  },
+  {
+    "content": "For placement operations, descend slowly at 20% speed when within 5cm of the target surface. Verify contact before releasing the gripper to prevent dropping.",
+    "metadata": {
+      "category": "placement",
+      "difficulty": "basic"
+    }
+  },
+  {
+    "content": "When sorting objects by color, follow this order: red, blue, green, yellow. This matches the standard color sorting convention and improves consistency.",
+    "metadata": {
+      "category": "sorting",
+      "object_type": "block",
+      "difficulty": "intermediate"
+    }
+  },
+  {
+    "content": "Before picking any object, move to a neutral home position (all joints at 0 degrees) to avoid collisions and ensure predictable motion paths.",
+    "metadata": {
+      "category": "safety",
+      "difficulty": "basic"
+    }
+  },
+  {
+    "content": "When moving objects to corners, reduce speed by 30% in the final approach phase to account for workspace boundaries and prevent collisions with walls.",
+    "metadata": {
+      "category": "movement",
+      "location": "corner",
+      "difficulty": "intermediate"
+    }
+  },
+  {
+    "content": "For red blocks specifically, they are typically located at position (0.5, 0.3, -0.2) in the simulation workspace. Adjust approach angle based on camera feedback.",
+    "metadata": {
+      "category": "object_location",
+      "object_type": "red_block",
+      "difficulty": "basic"
+    }
+  },
+  {
+    "content": "Blue blocks are positioned at (-0.5, 0.3, -0.2). Use a slightly wider grip aperture as blue blocks may be marginally larger in simulation.",
+    "metadata": {
+      "category": "object_location",
+      "object_type": "blue_block",
+      "difficulty": "basic"
+    }
+  },
+  {
+    "content": "After completing any manipulation task, always return to home position and open the gripper to prepare for the next command.",
+    "metadata": {
+      "category": "post_action",
+      "difficulty": "basic"
+    }
+  },
+  {
+    "content": "If visual feedback indicates the target object is not at the expected position, perform a spiral search pattern starting from the predicted location with 5cm radius increments.",
+    "metadata": {
+      "category": "error_recovery",
+      "difficulty": "advanced"
+    }
+  },
+  {
+    "content": "When executing multi-step commands (e.g., 'pick and place'), verify successful completion of each step before proceeding. Check gripper state and object presence.",
+    "metadata": {
+      "category": "multi_step",
+      "difficulty": "intermediate"
+    }
+  }
+]

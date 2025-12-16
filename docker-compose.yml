@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  ros2_humble:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: robolingua:ros2-humble
+    container_name: ai_agent_ros2
+    network_mode: host
+    privileged: true
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    volumes:
+      # Mount source code for development
+      - ./src:/root/ros2_ws/src/robolingua/src:rw
+      - ./ros_integration:/root/ros2_ws/src/robolingua/ros_integration:rw
+      - ./knowledge_base:/root/ros2_ws/src/robolingua/knowledge_base:rw
+      - ./tests:/root/ros2_ws/src/robolingua/tests:rw
+      # X11 socket for GUI
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      # Persistent data
+      - ./chroma_db:/root/ros2_ws/src/robolingua/chroma_db:rw
+      - ./.env:/root/ros2_ws/src/robolingua/.env:ro
+    devices:
+      - /dev/dri:/dev/dri  # GPU access
+    stdin_open: true
+    tty: true
+    command: bash
+
+  # Optional: GPU-enabled version (requires nvidia-docker)
+  ros2_humble_gpu:
+    extends: ros2_humble
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - gpu
