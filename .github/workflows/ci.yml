@@ -11,7 +11,7 @@ jobs:
     name: Code Linting
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -39,7 +39,7 @@ jobs:
     name: Python Tests
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -67,7 +67,7 @@ jobs:
     name: Docker Build
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -89,7 +89,7 @@ jobs:
     container:
       image: osrf/ros:humble-desktop-full
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       
       - name: Install dependencies
         run: |
