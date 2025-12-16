@@ -307,16 +307,6 @@ ros2 topic hz /robot_arm/camera/image_raw
 - **GPU**: Optional (NVIDIA with CUDA for faster inference)
 - **API Key**: OpenAI API key
 
-## 🤝 Contributing
-
-Contributions welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
-
 ## 📄 License
 
 MIT License - see LICENSE file for details
@@ -328,14 +318,4 @@ MIT License - see LICENSE file for details
 - Gazebo simulation team
 - ChromaDB and LangChain projects
 
-## 📞 Support
-
-- **Issues**: [GitHub Issues](<repository-url>/issues)
-- **Documentation**: [Wiki](<repository-url>/wiki)
-- **Discussions**: [GitHub Discussions](<repository-url>/discussions)
-
----
-
 **Built with**: ROS2 Humble | Gazebo | Python 3.10 | Docker | AI/ML
-
-**Status**: ✅ Production Ready | 🐳 Docker Support | 🤖 ROS2 Native
