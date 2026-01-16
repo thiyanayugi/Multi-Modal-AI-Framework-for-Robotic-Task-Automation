@@ -237,16 +237,19 @@ class RAGModule:
                 raise ValueError("top_k must be at least 1")
             
             # Generate query embedding
+            # Convert text query to vector representation for similarity search
             query_embedding = self.embedding_model.encode(query).tolist()
             
             # Query collection
+            # ChromaDB uses cosine similarity to find most relevant documents
             results = self.collection.query(
                 query_embeddings=[query_embedding],
-                n_results=min(top_k, self.collection.count()),
-                where=filter_metadata
+                n_results=min(top_k, self.collection.count()),  # Don't request more than available
+                where=filter_metadata  # Optional metadata filtering
             )
             
             # Format results
+            # Convert ChromaDB response to standardized dictionary format
             retrieved = []
             if results["ids"] and results["ids"][0]:
                 for i, doc_id in enumerate(results["ids"][0]):
@@ -254,6 +257,8 @@ class RAGModule:
                         "id": doc_id,
                         "content": results["documents"][0][i],
                         "metadata": results["metadatas"][0][i],
+                        # Convert distance to similarity score (1 - distance)
+                        # Higher score = more similar
                         "score": 1 - results["distances"][0][i] if results["distances"] else 1.0
                     })
             
