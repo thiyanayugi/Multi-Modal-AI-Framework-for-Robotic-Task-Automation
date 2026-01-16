@@ -200,6 +200,7 @@ class VisionModule:
         """
         try:
             # Default workspace queries
+            # Predefined queries cover common robotic manipulation scenarios
             if context_queries is None:
                 context_queries = [
                     "red block on table",
@@ -215,23 +216,28 @@ class VisionModule:
                 ]
             
             # Get image embeddings
+            # Store embeddings for potential future use (e.g., similarity comparison)
             embeddings = self.encode_image(image)
             
             # Detect objects
+            # Use lower threshold (0.15) to capture more potential objects
             detected_objects = self.find_objects(image, context_queries, threshold=0.15)
             
             # Generate workspace description
+            # Create human-readable summary of the scene
             if detected_objects:
+                # Use top 3 matches for concise description
                 top_matches = detected_objects[:3]
                 descriptions = [obj["description"] for obj in top_matches]
                 workspace_description = f"Workspace contains: {', '.join(descriptions)}"
             else:
                 workspace_description = "Workspace scene detected but no specific objects identified"
             
+            # Package all context information
             context = {
                 "detected_objects": detected_objects,
                 "workspace_description": workspace_description,
-                "embeddings": embeddings.tolist(),
+                "embeddings": embeddings.tolist(),  # Convert to list for JSON serialization
                 "num_objects": len(detected_objects)
             }
             
