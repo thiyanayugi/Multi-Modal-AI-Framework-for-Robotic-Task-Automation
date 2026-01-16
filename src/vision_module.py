@@ -74,6 +74,7 @@ class VisionModule:
         """
         try:
             # Load image if path is provided
+            # Support multiple input formats for flexibility
             if isinstance(image, str):
                 image = Image.open(image).convert("RGB")
             elif isinstance(image, np.ndarray):
@@ -82,13 +83,17 @@ class VisionModule:
                 raise ValueError(f"Unsupported image type: {type(image)}")
             
             # Process and encode
+            # CLIP processor handles resizing, normalization, and tensor conversion
             inputs = self.processor(images=image, return_tensors="pt").to(self.device)
             
             with torch.no_grad():
+                # Extract image features from CLIP vision encoder
                 image_features = self.model.get_image_features(**inputs)
-                # Normalize embeddings
+                # Normalize embeddings to unit length for cosine similarity
+                # This ensures consistent similarity scores between 0 and 1
                 image_features = image_features / image_features.norm(dim=-1, keepdim=True)
             
+            # Convert to numpy array for easier manipulation
             embeddings = image_features.cpu().numpy().flatten()
             logger.debug(f"Encoded image to embeddings of shape {embeddings.shape}")
             
