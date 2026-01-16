@@ -68,7 +68,26 @@ class LanguageModule:
     Language understanding module for parsing natural language commands.
     
     Uses GPT-3.5 to extract structured information from natural language
-    and assess command clarity.
+    and assess command clarity for safe robot execution.
+    
+    The module provides:
+    - Command parsing into structured ParsedCommand objects
+    - Ambiguity detection with clarification questions
+    - Intent extraction for command classification
+    - Natural language confirmation generation
+    
+    Example:
+        >>> lang = LanguageModule(api_key="sk-...")
+        >>> # Parse a command
+        >>> cmd = lang.parse_command("Pick up the red block carefully")
+        >>> print(cmd.action)  # "pick"
+        >>> print(cmd.target_object)  # "red block"
+        >>> print(cmd.constraints)  # ["carefully"]
+        >>> 
+        >>> # Check for ambiguity
+        >>> ambiguity = lang.check_ambiguity("Pick it up", cmd)
+        >>> if ambiguity.is_ambiguous:
+        ...     print(ambiguity.clarification_questions[0])  # "Which object should I pick up?"
     """
     
     def __init__(
