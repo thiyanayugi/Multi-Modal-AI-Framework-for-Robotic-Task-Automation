@@ -122,18 +122,22 @@ class RoboticAgent:
         try:
             logger.info("Initializing RoboticAgent...")
             
-            # Initialize language module
+            # Initialize language module first as it's required for all operations
+            # This module handles natural language parsing and intent extraction
             self.language_module = LanguageModule(api_key=api_key)
             
-            # Initialize RAG module
+            # Initialize RAG module for knowledge retrieval
+            # Uses ChromaDB for semantic search over manipulation strategies
             self.rag_module = RAGModule()
             
             # Load knowledge base if provided
+            # This populates the RAG system with domain-specific knowledge
             if knowledge_base_path and os.path.exists(knowledge_base_path):
                 self.rag_module.load_knowledge_from_file(knowledge_base_path)
                 logger.info(f"Loaded knowledge base from {knowledge_base_path}")
             
             # Initialize vision module if enabled
+            # Vision is optional and can be disabled for text-only tasks
             self.vision_module = None
             if enable_vision:
                 try:
@@ -143,11 +147,12 @@ class RoboticAgent:
                     logger.warning(f"Failed to initialize vision module: {e}. Continuing without vision.")
             
             # Initialize LLM for action planning
+            # This is separate from the language module's LLM to allow different temperatures
             api_key = api_key or os.getenv("OPENAI_API_KEY")
             self.planner_llm = ChatOpenAI(
                 api_key=api_key,
                 model_name="gpt-3.5-turbo",
-                temperature=0.5
+                temperature=0.5  # Higher temperature for more creative action planning
             )
             
             logger.info("RoboticAgent initialized successfully")
