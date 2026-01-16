@@ -63,21 +63,25 @@ class RAGModule:
         """
         try:
             # Initialize embedding model
+            # Sentence transformers convert text to dense vectors for semantic search
             logger.info(f"Loading embedding model: {embedding_model}")
             self.embedding_model = SentenceTransformer(embedding_model)
             
             # Setup ChromaDB
+            # Use persistent storage to maintain knowledge across sessions
             persist_dir = persist_directory or os.getenv("CHROMA_PERSIST_DIRECTORY", "./chroma_db")
             
+            # Create persistent client with telemetry disabled for privacy
             self.client = chromadb.PersistentClient(
                 path=persist_dir,
                 settings=Settings(
-                    anonymized_telemetry=False,
-                    allow_reset=True
+                    anonymized_telemetry=False,  # Disable telemetry for privacy
+                    allow_reset=True  # Allow collection reset for testing
                 )
             )
             
             # Get or create collection
+            # Collections store embeddings and metadata for efficient retrieval
             self.collection = self.client.get_or_create_collection(
                 name=collection_name,
                 metadata={"description": "Robotic manipulation knowledge base"}
