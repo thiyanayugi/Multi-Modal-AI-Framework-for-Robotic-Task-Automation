@@ -1,4 +1,14 @@
-"""Vision Module for CLIP-based image understanding and object detection."""
+"""Vision Module for CLIP-based image understanding and object detection.
+
+This module provides vision capabilities using OpenAI's CLIP (Contrastive Language-Image Pre-training)
+model for zero-shot object detection and visual context extraction. It enables the robotic agent to:
+- Encode images into semantic embeddings
+- Detect objects using natural language queries
+- Extract comprehensive workspace context
+- Compare images for similarity analysis
+
+The module uses HuggingFace's transformers library and supports both CPU and GPU inference.
+"""
 
 import logging
 from typing import Dict, List, Optional, Tuple, Union
