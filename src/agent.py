@@ -178,12 +178,19 @@ class RoboticAgent:
         5. Generate action plan with LLM
         
         Args:
-            command: Natural language command
-            image: Optional image of workspace
-            context: Optional additional context
+            command: Natural language command (e.g., "Pick up the red block")
+            image: Optional image of workspace (file path, PIL Image, or numpy array)
+            context: Optional additional context (e.g., {"robot_state": "idle"})
         
         Returns:
             TaskResult object with action plan and metadata
+            
+        Example:
+            >>> agent = RoboticAgent(api_key="sk-...")
+            >>> result = agent.process_task("Pick up the red block", image="workspace.jpg")
+            >>> if result.success:
+            ...     print(result.action_plan)
+            ...     # Outputs: "1. Move to red block position\\n2. Open gripper\\n..."
         """
         try:
             logger.info(f"Processing task: '{command}'")
