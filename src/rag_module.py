@@ -120,16 +120,20 @@ class RAGModule:
                 raise ValueError("Content cannot be empty")
             
             # Generate ID if not provided
+            # Use UUID for unique, collision-free identifiers
             doc_id = doc_id or str(uuid.uuid4())
             
             # Generate embedding
+            # Convert text to dense vector representation for semantic search
             embedding = self.embedding_model.encode(content).tolist()
             
             # Prepare metadata
+            # Add content length for potential filtering or analysis
             meta = metadata or {}
             meta["content_length"] = len(content)
             
             # Add to collection
+            # Store document with its embedding and metadata in ChromaDB
             self.collection.add(
                 ids=[doc_id],
                 embeddings=[embedding],
