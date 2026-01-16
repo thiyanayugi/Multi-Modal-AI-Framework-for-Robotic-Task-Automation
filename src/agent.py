@@ -308,6 +308,7 @@ class RoboticAgent:
         """
         try:
             # Build context sections
+            # Integrate visual information into the planning prompt
             visual_info = ""
             if visual_context:
                 visual_info = f"""
@@ -316,13 +317,17 @@ Visual Context:
 - Detected Objects: {', '.join([obj['description'] for obj in visual_context.get('detected_objects', [])[:5]])}
 """
             
+            # Format retrieved knowledge for prompt
+            # Provide relevant manipulation strategies to guide action planning
             knowledge_info = ""
             if retrieved_knowledge:
                 knowledge_info = "Relevant Knowledge:\n"
                 for i, entry in enumerate(retrieved_knowledge, 1):
+                    # Truncate long knowledge entries to keep prompt concise
                     knowledge_info += f"{i}. {entry['content'][:200]}...\n"
             
             # Create planning prompt
+            # Structured template ensures consistent and comprehensive action plans
             template = """You are a robotic task planner. Generate a detailed, step-by-step action plan for executing the given command.
 
 Original Command: "{command}"
@@ -347,6 +352,7 @@ Generate a detailed action plan with:
 Be specific about movements, grip forces, speeds, and safety measures.
 Format as a numbered list of concrete steps."""
 
+            # Fill in template with all available context
             prompt = template.format(
                 command=command,
                 action=parsed_command.action,
