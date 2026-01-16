@@ -26,7 +26,23 @@ class VisionModule:
     CLIP-based vision module for robotic task automation.
     
     Provides image encoding, object detection, and visual context extraction
-    using OpenAI's CLIP model.
+    using OpenAI's CLIP model for zero-shot visual understanding.
+    
+    The module leverages CLIP's multimodal capabilities to:
+    - Encode images into semantic embeddings for similarity comparison
+    - Detect objects using natural language queries without training
+    - Extract comprehensive workspace context for task planning
+    - Compare images to detect changes in the environment
+    
+    Example:
+        >>> vision = VisionModule(device="cuda")
+        >>> # Detect objects in workspace
+        >>> objects = vision.find_objects("workspace.jpg", ["red block", "blue block"])
+        >>> print(objects[0])  # {"object": "red", "description": "red block", "confidence": 0.85}
+        >>> 
+        >>> # Get comprehensive visual context
+        >>> context = vision.get_visual_context("workspace.jpg")
+        >>> print(context["workspace_description"])  # "Workspace contains: red block on table, ..."
     """
     
     def __init__(self, model_name: str = "openai/clip-vit-base-patch32", device: Optional[str] = None):
