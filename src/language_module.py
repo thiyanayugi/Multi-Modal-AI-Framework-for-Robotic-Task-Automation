@@ -108,15 +108,19 @@ class LanguageModule:
                 raise ValueError("Command cannot be empty")
             
             # Build context string
+            # Incorporate visual information to improve parsing accuracy
             context_str = ""
             if context:
+                # Extract detected objects from visual context
                 if "detected_objects" in context:
                     objects = [obj["description"] for obj in context["detected_objects"][:5]]
                     context_str += f"\nVisible objects: {', '.join(objects)}"
+                # Add workspace description for spatial understanding
                 if "workspace_description" in context:
                     context_str += f"\nWorkspace: {context['workspace_description']}"
             
             # Create parsing prompt
+            # Use structured prompting to guide GPT towards consistent output format
             template = """You are a robotic command parser. Extract structured information from natural language commands.
 
 Command: {command}
