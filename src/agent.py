@@ -211,13 +211,16 @@ class RoboticAgent:
                        f"target={parsed_command.target_object}")
             
             # Step 3: Retrieve relevant knowledge
+            # RAG system provides domain-specific manipulation strategies
             retrieved_knowledge = []
             if parsed_command.action != "unknown":
                 # Build retrieval query
+                # Combine action, target object, and constraints for semantic search
                 query_parts = [parsed_command.action]
                 if parsed_command.target_object:
                     query_parts.append(parsed_command.target_object)
                 if parsed_command.constraints:
+                    # Limit to first 2 constraints to keep query focused
                     query_parts.extend(parsed_command.constraints[:2])
                 
                 retrieval_query = " ".join(query_parts)
