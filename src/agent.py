@@ -189,15 +189,18 @@ class RoboticAgent:
             logger.info(f"Processing task: '{command}'")
             
             # Step 1: Get visual context if image provided
+            # Visual context helps the agent understand the workspace layout and object positions
             visual_context = None
             if image is not None and self.vision_module is not None:
                 try:
                     visual_context = self.vision_module.get_visual_context(image)
                     logger.info(f"Visual context: {visual_context['workspace_description']}")
                 except Exception as e:
+                    # Continue without visual context if extraction fails
                     logger.warning(f"Failed to extract visual context: {e}")
             
             # Merge contexts
+            # Combine visual context with any additional context provided by the caller
             full_context = context or {}
             if visual_context:
                 full_context.update(visual_context)
