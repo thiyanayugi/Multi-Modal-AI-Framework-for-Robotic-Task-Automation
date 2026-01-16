@@ -228,12 +228,15 @@ class RoboticAgent:
                 logger.info(f"Retrieved {len(retrieved_knowledge)} knowledge entries")
             
             # Step 4: Check ambiguity
+            # Assess whether the command is clear enough for safe execution
             ambiguity_check = self.language_module.check_ambiguity(
                 command,
                 parsed_command,
                 full_context
             )
             
+            # Reject highly ambiguous commands to prevent unsafe or incorrect actions
+            # Threshold of 0.7 balances between safety and usability
             if ambiguity_check.is_ambiguous and ambiguity_check.ambiguity_score > 0.7:
                 logger.warning(f"Command is ambiguous: {ambiguity_check.unclear_aspects}")
                 return TaskResult(
