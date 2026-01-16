@@ -68,17 +68,21 @@ class LanguageModule:
             ValueError: If API key is not provided or found in environment
         """
         try:
+            # Get API key from parameter or environment variable
             api_key = api_key or os.getenv("OPENAI_API_KEY")
             if not api_key:
                 raise ValueError("OpenAI API key not provided and OPENAI_API_KEY not set in environment")
             
+            # Initialize OpenAI LLM with low temperature for deterministic parsing
+            # Lower temperature (0.3) ensures consistent structured output
             self.llm = ChatOpenAI(
                 api_key=api_key,
                 model_name=model_name,
-                temperature=temperature
+                temperature=temperature  # Low temperature for more deterministic parsing
             )
             
             # Setup parsers
+            # Pydantic parsers ensure LLM outputs match expected schema
             self.command_parser = PydanticOutputParser(pydantic_object=ParsedCommand)
             self.ambiguity_parser = PydanticOutputParser(pydantic_object=AmbiguityCheck)
             
