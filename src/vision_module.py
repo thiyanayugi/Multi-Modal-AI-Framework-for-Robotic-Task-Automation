@@ -146,22 +146,27 @@ class VisionModule:
             ).to(self.device)
             
             # Get similarity scores
+            # CLIP computes similarity between image and each text query
             with torch.no_grad():
                 outputs = self.model(**inputs)
                 logits_per_image = outputs.logits_per_image
+                # Convert logits to probabilities using softmax
+                # This normalizes scores so they sum to 1.0
                 probs = logits_per_image.softmax(dim=1).cpu().numpy()[0]
             
             # Filter and format results
+            # Only include matches above the confidence threshold
             results = []
             for query, confidence in zip(text_queries, probs):
                 if confidence >= threshold:
                     results.append({
-                        "object": query.split()[0] if query else "unknown",
+                        "object": query.split()[0] if query else "unknown",  # Extract first word as object name
                         "description": query,
                         "confidence": float(confidence)
                     })
             
             # Sort by confidence
+            # Highest confidence matches appear first for easier processing
             results.sort(key=lambda x: x["confidence"], reverse=True)
             
             logger.info(f"Found {len(results)} objects matching queries")
