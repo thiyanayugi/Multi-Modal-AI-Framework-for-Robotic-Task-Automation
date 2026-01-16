@@ -24,7 +24,28 @@ logger = logging.getLogger(__name__)
 
 
 class ParsedCommand(BaseModel):
-    """Structured representation of a parsed robotic command."""
+    """Structured representation of a parsed robotic command.
+    
+    This Pydantic model ensures consistent parsing of natural language commands
+    into a structured format that can be used for action planning and execution.
+    
+    Attributes:
+        action: Primary action verb (e.g., "pick", "place", "move", "sort", "grasp")
+        target_object: Object to manipulate, including descriptors (e.g., "red block", "small cube")
+        destination: Target location for placement or movement (e.g., "corner", "left side", "bin")
+        constraints: Additional requirements or modifiers (e.g., "carefully", "quickly", "avoid obstacles")
+        confidence: Parser's confidence in the interpretation, range 0.0-1.0
+    
+    Example:
+        >>> cmd = ParsedCommand(
+        ...     action="pick",
+        ...     target_object="red block",
+        ...     destination="corner",
+        ...     constraints=["carefully"],
+        ...     confidence=0.95
+        ... )
+        >>> print(f"{cmd.action} the {cmd.target_object}")  # "pick the red block"
+    """
     
     action: str = Field(description="The primary action to perform (e.g., 'pick', 'place', 'move', 'sort')")
     target_object: Optional[str] = Field(default=None, description="The object to manipulate")
