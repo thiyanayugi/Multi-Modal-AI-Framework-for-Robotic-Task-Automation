@@ -111,13 +111,25 @@ class RoboticAgent:
         Initialize the RoboticAgent with all modules.
         
         Args:
-            api_key: OpenAI API key (if None, reads from environment)
-            knowledge_base_path: Path to knowledge base JSON file
-            enable_vision: Whether to initialize vision module
-            device: Device for vision module ('cuda', 'cpu', or None for auto)
+            api_key: OpenAI API key (if None, reads from environment variable OPENAI_API_KEY)
+            knowledge_base_path: Path to knowledge base JSON file containing manipulation strategies
+                                (if None, starts with empty knowledge base)
+            enable_vision: Whether to initialize vision module (set to False for text-only tasks)
+            device: Device for vision module ('cuda' for GPU, 'cpu', or None for auto-detection)
         
         Raises:
-            RuntimeError: If initialization fails
+            RuntimeError: If initialization fails (e.g., invalid API key, missing dependencies)
+            
+        Example:
+            >>> # Initialize with API key and knowledge base
+            >>> agent = RoboticAgent(
+            ...     api_key="sk-...",
+            ...     knowledge_base_path="./knowledge_base/manipulation_strategies.json",
+            ...     enable_vision=True,
+            ...     device="cuda"
+            ... )
+            >>> status = agent.get_system_status()
+            >>> print(status["vision_module"])  # "enabled"
         """
         try:
             logger.info("Initializing RoboticAgent...")
