@@ -1,4 +1,14 @@
-"""Language Module for natural language command parsing and understanding."""
+"""Language Module for natural language command parsing and understanding.
+
+This module provides natural language processing capabilities using GPT-3.5 for robotic task automation.
+It enables the agent to:
+- Parse natural language commands into structured representations
+- Extract high-level intent from user commands
+- Check for ambiguity and generate clarification questions
+- Generate human-readable confirmations
+
+The module uses LangChain with OpenAI's GPT models and Pydantic for structured output parsing.
+"""
 
 import json
 import logging
