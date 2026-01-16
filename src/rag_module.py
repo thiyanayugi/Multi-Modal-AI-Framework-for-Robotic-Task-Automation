@@ -1,4 +1,15 @@
-"""RAG Module for knowledge retrieval using ChromaDB and semantic search."""
+"""RAG Module for knowledge retrieval using ChromaDB and semantic search.
+
+This module provides Retrieval-Augmented Generation (RAG) capabilities for robotic task automation.
+It enables the agent to:
+- Store and retrieve domain-specific knowledge about manipulation strategies
+- Perform semantic search using sentence transformers
+- Filter knowledge by metadata categories
+- Load knowledge bases from JSON files
+
+The module uses ChromaDB for vector storage and sentence-transformers for embedding generation,
+providing fast and accurate semantic retrieval to augment the agent's decision-making.
+"""
 
 # Fix for SQLite version issue with ChromaDB
 import sys
