@@ -41,7 +41,26 @@ class RAGModule:
     Retrieval-Augmented Generation module using ChromaDB.
     
     Provides semantic search over a knowledge base of robotic manipulation
-    strategies and procedures.
+    strategies and procedures using vector embeddings and similarity search.
+    
+    The module enables:
+    - Storage of domain-specific knowledge with metadata
+    - Semantic retrieval using natural language queries
+    - Batch knowledge loading from JSON files
+    - Metadata-based filtering for targeted retrieval
+    
+    Example:
+        >>> rag = RAGModule(collection_name="robot_knowledge")
+        >>> # Add knowledge entry
+        >>> rag.add_knowledge(
+        ...     "When grasping blocks, approach from the top with 50% grip force.",
+        ...     metadata={"category": "grasping", "object": "block"}
+        ... )
+        >>> 
+        >>> # Retrieve relevant knowledge
+        >>> results = rag.retrieve("how to pick up a block", top_k=3)
+        >>> print(results[0]["content"])  # "When grasping blocks, approach from..."
+        >>> print(results[0]["score"])  # 0.92
     """
     
     def __init__(
