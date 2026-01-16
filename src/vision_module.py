@@ -41,11 +41,16 @@ class VisionModule:
             RuntimeError: If model loading fails
         """
         try:
+            # Auto-detect device: prefer CUDA if available for faster inference
             self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
             logger.info(f"Initializing VisionModule with {model_name} on {self.device}")
             
+            # Load pre-trained CLIP model and processor from HuggingFace
+            # Model is moved to the selected device (CPU/GPU)
             self.model = CLIPModel.from_pretrained(model_name).to(self.device)
             self.processor = CLIPProcessor.from_pretrained(model_name)
+            
+            # Set model to evaluation mode to disable dropout and batch normalization training behavior
             self.model.eval()
             
             logger.info("VisionModule initialized successfully")
