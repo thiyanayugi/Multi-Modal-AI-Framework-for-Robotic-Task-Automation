@@ -1,4 +1,14 @@
-"""Main Robotic Agent that orchestrates all modules for task automation."""
+"""Main Robotic Agent that orchestrates all modules for task automation.
+
+This module provides the RoboticAgent class, which serves as the central orchestrator
+for multi-modal robotic task automation. It integrates three key components:
+- Vision Module: CLIP-based visual understanding for scene analysis
+- Language Module: GPT-powered natural language command parsing
+- RAG Module: Knowledge retrieval for manipulation strategies
+
+The agent processes natural language commands, extracts visual context from images,
+retrieves relevant knowledge, and generates detailed action plans for robot execution.
+"""
 
 import logging
 import os
