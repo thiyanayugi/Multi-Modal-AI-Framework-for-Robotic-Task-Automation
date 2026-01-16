@@ -27,7 +27,26 @@ logger = logging.getLogger(__name__)
 
 
 class TaskResult:
-    """Result of task processing."""
+    """Result of task processing.
+    
+    Encapsulates the complete output of the RoboticAgent's task processing pipeline,
+    including the generated action plan, parsed command structure, visual context,
+    retrieved knowledge, and any errors or ambiguity warnings.
+    
+    Attributes:
+        success: Whether the task was processed successfully
+        action_plan: Generated step-by-step action plan for robot execution
+        parsed_command: Structured representation of the command
+        visual_context: Extracted visual information from workspace image
+        retrieved_knowledge: Relevant knowledge entries from RAG system
+        ambiguity_check: Results of command clarity analysis
+        error: Error message if processing failed
+    
+    Example:
+        >>> result = agent.process_task("Pick up the red block")
+        >>> if result.success:
+        ...     print(result.action_plan)
+    """
     
     def __init__(
         self,
