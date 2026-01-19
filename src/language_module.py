@@ -232,43 +232,52 @@ Provide your response as valid JSON matching the schema."""
             RuntimeError: If ambiguity checking fails
         """
         try:
-            # Build context
+            # Build context string
+            # Include all available information to help assess clarity
             context_str = ""
-            if parsed_command:
-                context_str += f"\nParsed as: action={parsed_command.action}, "
-                context_str += f"target={parsed_command.target_object}, dest={parsed_command.destination}"
-            
-            if context and "detected_objects" in context:
-                objects = [obj["description"] for obj in context["detected_objects"][:5]]
-                context_str += f"\nVisible objects: {', '.join(objects)}"
+            if context:
+                if "detected_objects" in context:
+                    objects = [obj["description"] for obj in context["detected_objects"][:5]]
+                    context_str += f"\nVisible objects: {', '.join(objects)}"
+                if "workspace_description" in context:
+                    context_str += f"\nWorkspace: {context['workspace_description']}"
             
             # Create ambiguity checking prompt
-            template = """You are analyzing robotic commands for ambiguity and clarity.
+            # Ask LLM to assess whether the command is clear enough for safe execution
+            template = """Analyze the following robotic command for ambiguity.
 
 Command: "{command}"
+
+Parsed Information:
+- Action: {action}
+- Target: {target}
+- Destination: {destination}
+- Constraints: {constraints}
 {context}
 
-Assess whether this command is clear enough for a robot to execute safely and correctly.
-
-Consider:
-- Is the target object clearly specified?
-- Is the action unambiguous?
-- If placement is involved, is the destination clear?
-- Are there multiple possible interpretations?
-- Is additional information needed?
+Assess if the command is clear enough for safe robot execution. Consider:
+1. Are there multiple possible interpretations?
+2. Is the target object clearly specified?
+3. Is the destination (if needed) clear?
+4. Are there any safety concerns due to unclear instructions?
 
 {format_instructions}
+"""
 
-Provide your assessment as valid JSON matching the schema."""
-
-            prompt = PromptTemplate(
-                template=template,
-                input_variables=["command", "context"],
-                partial_variables={"format_instructions": self.ambiguity_parser.get_format_instructions()}
+            # Format prompt with all context
+            # Provide parsed command details and environmental context to the LLM
+            formatted_prompt = template.format(
+                command=command,
+                action=parsed_command.action if parsed_command else "Not parsed yet",
+                target=parsed_command.target_object if parsed_command and parsed_command.target_object else "Not specified",
+                destination=parsed_command.destination if parsed_command and parsed_command.destination else "Not specified",
+                constraints=", ".join(parsed_command.constraints) if parsed_command and parsed_command.constraints else "None",
+                context=context_str,
+                format_instructions=self.ambiguity_parser.get_format_instructions()
             )
             
-            # Check ambiguity
-            formatted_prompt = prompt.format(command=command, context=context_str)
+            # Check ambiguity using the LLM
+            # The LLM will output a structured response based on the AmbiguityCheck schema
             response = self.llm.invoke(formatted_prompt)
             ambiguity_check = self.ambiguity_parser.parse(response.content)
             
