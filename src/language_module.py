@@ -351,30 +351,42 @@ Respond with just the intent category (lowercase, single word).
         
         Args:
             parsed_command: Parsed command structure
-        
-        Returns:
-            Human-readable confirmation string
         """
         try:
-            parts = [f"I will {parsed_command.action}"]
+            # Create confirmation prompt
+            # Generate human-friendly confirmation for user verification
+            template = """Generate a natural, conversational confirmation message for this robotic command.
+
+Parsed Command:
+- Action: {action}
+- Target: {target}
+- Destination: {destination}
+- Constraints: {constraints}
+
+Generate a brief, friendly confirmation like:
+"I'll {action} the {target} and place it {destination}."
+
+Keep it natural and concise (1-2 sentences max).
+"""
+
+            # Format prompt with parsed command details
+            # Provide all context for natural language generation
+            prompt = template.format(
+                action=parsed_command.action,
+                target=parsed_command.target_object or "the object",
+                destination=parsed_command.destination or "in the specified location",
+                constraints=", ".join(parsed_command.constraints) if parsed_command.constraints else "none"
+            )
             
-            if parsed_command.target_object:
-                parts.append(f"the {parsed_command.target_object}")
+            # Generate confirmation using LLM
+            # LLM creates natural, user-friendly confirmation message
+            response = self.llm.invoke(prompt)
+            confirmation = response.content.strip()
             
-            if parsed_command.destination:
-                parts.append(f"to {parsed_command.destination}")
-            
-            if parsed_command.constraints:
-                parts.append(f"({', '.join(parsed_command.constraints)})")
-            
-            confirmation = " ".join(parts) + "."
-            
-            if parsed_command.confidence < 0.7:
-                confirmation += f" (Confidence: {parsed_command.confidence:.0%})"
-            
+            logger.debug(f"Generated confirmation: {confirmation}")
             return confirmation
             
         except Exception as e:
             logger.error(f"Failed to generate confirmation: {e}")
-            return "Command received but confirmation generation failed."
-
+            # Return a simple fallback confirmation
+            return f"I'll {parsed_command.action} the {parsed_command.target_object or 'object'}."
