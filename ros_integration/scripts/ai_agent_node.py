@@ -36,18 +36,23 @@ class AIAgentROSNode(Node):
         self.get_logger().info("Initializing AI Agent ROS2 Node...")
         
         # Initialize CV Bridge for image conversion
+        # Converts between ROS2 Image messages and OpenCV/NumPy arrays
         self.bridge = CvBridge()
         
         # Store latest camera image
+        # Cache the most recent image for use when processing commands
         self.latest_image = None
         
         # Initialize AI Agent
+        # Load knowledge base from the framework directory
         knowledge_base_path = os.path.join(
             framework_path, 
             "knowledge_base/manipulation_strategies.json"
         )
         
         try:
+            # Create RoboticAgent with vision enabled for multimodal understanding
+            # This integrates language, vision, and RAG modules
             self.agent = RoboticAgent(
                 knowledge_base_path=knowledge_base_path,
                 enable_vision=True
