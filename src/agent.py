@@ -274,6 +274,7 @@ class RoboticAgent:
                 )
             
             # Step 5: Generate action plan
+            # Combine all context to create detailed execution steps
             action_plan = self._generate_action_plan(
                 command,
                 parsed_command,
@@ -284,21 +285,29 @@ class RoboticAgent:
             
             logger.info("Task processing completed successfully")
             
+            # Return successful result
+            # Package all information for downstream processing or logging
             return TaskResult(
                 success=True,
                 action_plan=action_plan,
                 parsed_command=parsed_command,
                 visual_context=visual_context,
                 retrieved_knowledge=retrieved_knowledge,
-                ambiguity_check=ambiguity_check.dict()
+                ambiguity_check=ambiguity_check.dict() if ambiguity_check else None,
+                error=None
             )
             
         except Exception as e:
-            logger.error(f"Failed to process task: {e}")
+            # Handle unexpected errors gracefully
+            # Return error result instead of crashing
+            logger.error(f"Error processing task: {e}")
             return TaskResult(
                 success=False,
                 action_plan="",
-                parsed_command=ParsedCommand(action="error", confidence=0.0),
+                parsed_command=None,
+                visual_context=None,
+                retrieved_knowledge=[],
+                ambiguity_check=None,
                 error=str(e)
             )
     
