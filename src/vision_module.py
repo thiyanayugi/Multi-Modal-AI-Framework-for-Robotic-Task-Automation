@@ -283,13 +283,18 @@ class VisionModule:
             RuntimeError: If comparison fails
         """
         try:
+            # Encode both images to get their CLIP embeddings
+            # Embeddings are already normalized to unit length
             emb1 = self.encode_image(image1)
             emb2 = self.encode_image(image2)
             
             # Cosine similarity
+            # Since embeddings are normalized, dot product equals cosine similarity
+            # Result ranges from -1 (opposite) to 1 (identical)
             similarity = np.dot(emb1, emb2) / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
             
             logger.debug(f"Image similarity: {similarity:.4f}")
+            # Return as float for JSON serialization
             return float(similarity)
             
         except Exception as e:
