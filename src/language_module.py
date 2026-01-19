@@ -55,7 +55,27 @@ class ParsedCommand(BaseModel):
 
 
 class AmbiguityCheck(BaseModel):
-    """Result of ambiguity checking for a command."""
+    """Result of ambiguity checking for a command.
+    
+    This Pydantic model encapsulates the results of analyzing a command
+    for clarity and safety before robot execution.
+    
+    Attributes:
+        is_ambiguous: Whether the command contains ambiguities
+        ambiguity_score: Degree of ambiguity from 0 (clear) to 1 (very ambiguous)
+        unclear_aspects: List of specific unclear elements in the command
+        clarification_questions: Questions to ask user for clarification
+    
+    Example:
+        >>> check = AmbiguityCheck(
+        ...     is_ambiguous=True,
+        ...     ambiguity_score=0.8,
+        ...     unclear_aspects=["Target object not specified"],
+        ...     clarification_questions=["Which object should I pick up?"]
+        ... )
+        >>> if check.is_ambiguous:
+        ...     print(check.clarification_questions[0])  # "Which object should I pick up?"
+    """
     
     is_ambiguous: bool = Field(description="Whether the command is ambiguous")
     ambiguity_score: float = Field(description="Degree of ambiguity (0=clear, 1=very ambiguous)")
