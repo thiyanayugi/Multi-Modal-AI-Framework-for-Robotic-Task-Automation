@@ -68,9 +68,12 @@ class TaskResult:
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert result to dictionary."""
+        # Serialize TaskResult to dictionary format for JSON export or logging
+        # This enables easy integration with ROS2 messages and external systems
         return {
             "success": self.success,
             "action_plan": self.action_plan,
+            # Convert ParsedCommand Pydantic model to dict
             "parsed_command": {
                 "action": self.parsed_command.action,
                 "target_object": self.parsed_command.target_object,
@@ -78,6 +81,7 @@ class TaskResult:
                 "constraints": self.parsed_command.constraints,
                 "confidence": self.parsed_command.confidence
             },
+            # Include all context and metadata for debugging
             "visual_context": self.visual_context,
             "retrieved_knowledge": self.retrieved_knowledge,
             "ambiguity_check": self.ambiguity_check,
@@ -86,6 +90,7 @@ class TaskResult:
     
     def __str__(self) -> str:
         """String representation."""
+        # Provide concise string representation for logging
         if self.success:
             return f"TaskResult(success=True, action={self.parsed_command.action})"
         else:
