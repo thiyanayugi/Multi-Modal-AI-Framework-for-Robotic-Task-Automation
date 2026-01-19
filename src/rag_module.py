@@ -409,13 +409,18 @@ class RAGModule:
         Warning: This operation cannot be undone.
         """
         try:
-            # Delete and recreate collection
-            self.client.delete_collection(self.collection.name)
+            # Delete the existing collection
+            # This removes all documents and embeddings from the database
+            self.client.delete_collection(name=self.collection.name)
+            logger.info(f"Deleted collection '{self.collection.name}'")
+            
+            # Recreate the collection
+            # Start fresh with an empty collection using the same configuration
             self.collection = self.client.create_collection(
                 name=self.collection.name,
                 metadata={"description": "Robotic manipulation knowledge base"}
             )
-            logger.warning(f"Cleared collection '{self.collection.name}'")
+            logger.info(f"Recreated empty collection '{self.collection.name}'")
             
         except Exception as e:
             logger.error(f"Failed to clear collection: {e}")
