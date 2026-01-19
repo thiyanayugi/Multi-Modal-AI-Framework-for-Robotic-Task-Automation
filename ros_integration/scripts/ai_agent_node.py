@@ -153,6 +153,7 @@ class AIAgentROSNode(Node):
                 self.get_logger().info("✓ Command processed successfully")
                 
                 # Publish action plan
+                # Format result as structured message for robot controller
                 action_plan_msg = String()
                 action_plan_msg.data = f"ACTION: {result.parsed_command.action}\n"
                 action_plan_msg.data += f"TARGET: {result.parsed_command.target_object}\n"
@@ -160,13 +161,16 @@ class AIAgentROSNode(Node):
                 action_plan_msg.data += f"CONFIDENCE: {result.parsed_command.confidence:.2f}\n\n"
                 action_plan_msg.data += f"PLAN:\n{result.action_plan}"
                 
+                # Broadcast action plan to robot controller
                 self.action_pub.publish(action_plan_msg)
                 
                 # Extract target position if available
+                # Visual context may contain spatial information for navigation
                 if result.visual_context:
                     self.get_logger().info(f"Visual context: {result.visual_context.get('workspace_description', 'N/A')}")
                 
                 # Publish success status
+                # Notify subscribers that processing completed successfully
                 success_msg = String()
                 success_msg.data = "Command processed successfully"
                 self.status_pub.publish(success_msg)
