@@ -391,6 +391,7 @@ Format as a numbered list of concrete steps."""
             )
             
             # Generate plan
+            # Invoke LLM to create detailed, step-by-step action plan
             response = self.planner_llm.invoke(prompt)
             action_plan = response.content
             
@@ -399,7 +400,9 @@ Format as a numbered list of concrete steps."""
             
         except Exception as e:
             logger.error(f"Failed to generate action plan: {e}")
-            return f"Error generating action plan: {e}"
+            # Return a basic fallback plan
+            # Ensures system can continue even if LLM fails
+            return f"1. {parsed_command.action.capitalize()} the {parsed_command.target_object or 'object'}\n2. Verify completion"
     
     def get_system_status(self) -> Dict[str, Any]:
         """
