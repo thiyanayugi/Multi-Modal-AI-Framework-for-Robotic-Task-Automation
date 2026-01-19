@@ -111,7 +111,10 @@ class AIAgentROSNode(Node):
         """
         try:
             # Convert ROS2 Image to OpenCV format
+            # cv_bridge handles the conversion from ROS2 message to NumPy array
             cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
+            # Cache the latest image for use in command processing
+            # This ensures we always use the most recent visual information
             self.latest_image = cv_image
         except Exception as e:
             self.get_logger().error(f"Error processing image: {e}")
