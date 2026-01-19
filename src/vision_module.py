@@ -91,21 +91,31 @@ class VisionModule:
             RuntimeError: If encoding fails
         """
         try:
-            # Load image if path is provided
-            # Support multiple input formats for flexibility
+            # Load image from path
+            # Support multiple input formats: file path, PIL Image, or NumPy array
             if isinstance(image, str):
-                image = Image.open(image).convert("RGB")
+                # Load from file path
+                pil_image = Image.open(image).convert("RGB")
             elif isinstance(image, np.ndarray):
-                image = Image.fromarray(image).convert("RGB")
-            elif not isinstance(image, Image.Image):
+                # Convert NumPy array to PIL Image
+                # Ensure RGB format for CLIP compatibility
+                pil_image = Image.fromarray(image).convert("RGB")
+            elif isinstance(image, Image.Image):
+                # Already a PIL Image, just ensure RGB format
+                pil_image = image.convert("RGB")
+            else:
                 raise ValueError(f"Unsupported image type: {type(image)}")
             
-            # Process and encode
+            # Preprocess image for CLIP
             # CLIP processor handles resizing, normalization, and tensor conversion
-            inputs = self.processor(images=image, return_tensors="pt").to(self.device)
+            inputs = self.processor(images=pil_image, return_tensors="pt")
+            # Move tensors to the same device as the model (CPU or GPU)
+            inputs = {k: v.to(self.device) for k, v in inputs.items()}
             
+            # Extract image embeddings
+            # Use no_grad() to disable gradient computation for inference efficiency
             with torch.no_grad():
-                # Extract image features from CLIP vision encoder
+                # Get image features from CLIP vision encoder
                 image_features = self.model.get_image_features(**inputs)
                 # Normalize embeddings to unit length for cosine similarity
                 # This ensures consistent similarity scores between 0 and 1
