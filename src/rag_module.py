@@ -191,35 +191,38 @@ class RAGModule:
             ids = []
             embeddings = []
             documents = []
+            embeddings_list = []
             metadatas = []
             
+            # Process each entry
+            # Generate embeddings and prepare metadata for all entries
             for entry in entries:
-                if "content" not in entry:
-                    raise ValueError("Each entry must have 'content' field")
+                content = entry.get("content")
+                if not content or not content.strip():
+                    logger.warning("Skipping empty content in batch")
+                    continue
                 
-                content = entry["content"]
+                # Generate unique ID if not provided
                 doc_id = entry.get("id", str(uuid.uuid4()))
-                metadata = entry.get("metadata", {})
-
-                # Convert list values to comma-separated strings (ChromaDB requirement)
-                for key, value in metadata.items():
-                    if isinstance(value, list):
-                        metadata[key] = ", ".join(str(v) for v in value)
-
-                metadata["content_length"] = len(content)
-                
-                # Generate embedding
-                embedding = self.embedding_model.encode(content).tolist()
-                
                 ids.append(doc_id)
-                embeddings.append(embedding)
+                
+                # Store document content
                 documents.append(content)
-                metadatas.append(metadata)
+                
+                # Generate embedding for semantic search
+                embedding = self.embedding_model.encode(content).tolist()
+                embeddings_list.append(embedding)
+                
+                # Prepare metadata with content length
+                meta = entry.get("metadata", {})
+                meta["content_length"] = len(content)
+                metadatas.append(meta)
             
-            # Add batch to collection
+            # Batch add to collection
+            # Single ChromaDB operation is much faster than individual inserts
             self.collection.add(
                 ids=ids,
-                embeddings=embeddings,
+                embeddings=embeddings_list,
                 documents=documents,
                 metadatas=metadatas
             )
