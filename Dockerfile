@@ -1,13 +1,18 @@
 # ROS2 Humble AI Agent Framework Dockerfile
+# Multi-stage build for ROS2 Humble with AI/ML dependencies
 FROM osrf/ros:humble-desktop-full
 
 # Set environment variables
+# Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 ENV ROS_DISTRO=humble
+# Ensure Python output is sent straight to terminal without buffering
 ENV PYTHONUNBUFFERED=1
 
 # Install system dependencies
+# Core development tools and ROS2 packages for robotic manipulation
 RUN apt-get update && apt-get install -y \
+    # Python and build tools
     python3-pip \
     python3-colcon-common-extensions \
     python3-rosdep \
@@ -18,21 +23,24 @@ RUN apt-get update && apt-get install -y \
     nano \
     build-essential \
     cmake \
-    # Gazebo dependencies
+    # Gazebo dependencies for simulation
     ros-${ROS_DISTRO}-gazebo-ros-pkgs \
     ros-${ROS_DISTRO}-gazebo-ros \
+    # ROS2 control packages for robot manipulation
     ros-${ROS_DISTRO}-ros2-control \
     ros-${ROS_DISTRO}-ros2-controllers \
     ros-${ROS_DISTRO}-robot-state-publisher \
     ros-${ROS_DISTRO}-joint-state-publisher \
     ros-${ROS_DISTRO}-xacro \
+    # Computer vision bridge for image processing
     ros-${ROS_DISTRO}-cv-bridge \
     ros-${ROS_DISTRO}-image-transport \
-    # X11 and display
+    # X11 and display for Gazebo GUI
     x11-apps \
     mesa-utils \
     libgl1-mesa-glx \
     libgl1-mesa-dri \
+    # Clean up apt cache to reduce image size
     && rm -rf /var/lib/apt/lists/*
 
 # Create workspace
