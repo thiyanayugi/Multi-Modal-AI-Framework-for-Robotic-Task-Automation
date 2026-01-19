@@ -399,10 +399,13 @@ Format as a numbered list of concrete steps."""
         Returns:
             Dictionary with module status information
         """
+        # Collect status information from all modules for health monitoring
         status = {
             "language_module": "initialized",
             "rag_module": "initialized",
+            # Vision module may be disabled for text-only tasks
             "vision_module": "enabled" if self.vision_module else "disabled",
+            # Include knowledge base statistics for debugging
             "knowledge_base_stats": self.rag_module.get_collection_stats()
         }
         return status
@@ -418,6 +421,8 @@ Format as a numbered list of concrete steps."""
             Number of entries loaded
         """
         try:
+            # Delegate to RAG module for knowledge loading
+            # This allows hot-reloading of knowledge without restarting the agent
             count = self.rag_module.load_knowledge_from_file(file_path)
             logger.info(f"Loaded {count} knowledge entries")
             return count
