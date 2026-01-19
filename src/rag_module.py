@@ -322,23 +322,46 @@ class RAGModule:
         """
         try:
             if not os.path.exists(file_path):
-                raise FileNotFoundError(f"File not found: {file_path}")
+                raise FileNotFoundError(f"Knowledge base file not found: {file_path}")
             
+            # Load JSON file
+            # Expected format: list of objects with 'content' and optional 'metadata' fields
             with open(file_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
+            # Validate format
+            # Ensure data is a list of knowledge entries
             if not isinstance(data, list):
-                raise ValueError("JSON file must contain a list of entries")
+                raise ValueError("Knowledge base file must contain a JSON array")
             
-            # Add entries in batch
-            ids = self.add_knowledge_batch(data)
+            # Process entries
+            # Convert JSON objects to the format expected by add_knowledge_batch
+            entries = []
+            for item in data:
+                if isinstance(item, dict) and "content" in item:
+                    entries.append(item)
+                elif isinstance(item, str):
+                    # Support simple string arrays for backward compatibility
+                    entries.append({"content": item})
+                else:
+                    logger.warning(f"Skipping invalid entry: {item}")
             
-            logger.info(f"Loaded {len(ids)} knowledge entries from {file_path}")
-            return len(ids)
+            # Batch add all entries
+            # More efficient than adding one at a time
+            count = self.add_knowledge_batch(entries)
+            logger.info(f"Loaded {count} entries from {file_path}")
             
+            return count
+            
+        except FileNotFoundError:
+            # Re-raise file not found errors for caller to handle
+            raise
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in knowledge base file: {e}")
+            raise ValueError(f"Invalid JSON format: {e}")
         except Exception as e:
-            logger.error(f"Failed to load knowledge from file: {e}")
-            raise RuntimeError(f"Knowledge loading failed: {e}")
+            logger.error(f"Failed to load knowledge base: {e}")
+            raise RuntimeError(f"Knowledge base loading failed: {e}")
     
     def get_collection_stats(self) -> Dict[str, Any]:
         """
