@@ -18,8 +18,10 @@ from PIL import Image as PILImage
 
 # Add AI Agent Framework to path
 # Get the actual path (resolve symlinks)
+# This ensures the framework can be imported even when installed via symlink
 script_path = Path(__file__).resolve()
 # Go up from scripts/ -> ros_integration/ -> ai_agent_framework/
+# Navigate directory structure to find the framework root
 framework_path = script_path.parent.parent.parent
 sys.path.insert(0, str(framework_path))
 
