@@ -307,34 +307,43 @@ Assess if the command is clear enough for safe robot execution. Consider:
             Dictionary with intent classification and confidence
         """
         try:
-            template = """Classify the intent of this robotic command into one of these categories:
-- MANIPULATION: Picking, placing, grasping objects
-- NAVIGATION: Moving to locations
-- INSPECTION: Looking at or analyzing objects
-- SORTING: Organizing or categorizing objects
-- QUERY: Asking for information
-- OTHER: Other intents
+            # Create intent extraction prompt
+            # Classify the command into predefined intent categories
+            template = """Extract the primary intent from this robotic command.
 
 Command: "{command}"
 
-Respond with JSON: {{"intent": "CATEGORY", "confidence": 0.0-1.0, "reasoning": "brief explanation"}}"""
+Classify the intent into one of these categories:
+- manipulation: Picking, placing, grasping, releasing objects
+- navigation: Moving the robot base or arm to a location
+- inspection: Looking at, examining, or identifying objects
+- sorting: Organizing or categorizing objects
+- assembly: Combining or constructing objects
+- other: Any other intent
 
+Respond with just the intent category (lowercase, single word).
+"""
+
+            # Extract intent using LLM
+            # Simple classification task for routing or analytics
             prompt = template.format(command=command)
             response = self.llm.invoke(prompt)
+            intent = response.content.strip().lower()
             
-            # Parse JSON response
-            result = json.loads(response.content)
-            logger.debug(f"Extracted intent: {result['intent']}")
+            # Validate intent
+            # Ensure the response is one of the expected categories
+            valid_intents = ["manipulation", "navigation", "inspection", "sorting", "assembly", "other"]
+            if intent not in valid_intents:
+                logger.warning(f"Unexpected intent '{intent}', defaulting to 'other'")
+                intent = "other"
             
-            return result
+            logger.info(f"Extracted intent: {intent}")
+            return intent
             
         except Exception as e:
             logger.error(f"Failed to extract intent: {e}")
-            return {
-                "intent": "OTHER",
-                "confidence": 0.0,
-                "reasoning": "Intent extraction failed"
-            }
+            # Return default intent on error
+            return "other"
     
     def generate_confirmation(self, parsed_command: ParsedCommand) -> str:
         """
