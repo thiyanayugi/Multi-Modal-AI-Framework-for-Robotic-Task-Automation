@@ -188,6 +188,7 @@ Provide your response as valid JSON matching the schema."""
             )
             
             # Parse command
+            # Use LLM to extract structured information from natural language
             formatted_prompt = prompt.format(command=command, context=context_str)
             response = self.llm.invoke(formatted_prompt)
             parsed = self.command_parser.parse(response.content)
@@ -200,6 +201,8 @@ Provide your response as valid JSON matching the schema."""
         except Exception as e:
             logger.error(f"Failed to parse command '{command}': {e}")
             # Return a fallback parsed command
+            # This ensures the system can continue even if parsing fails
+            # The low confidence (0.0) signals downstream components to handle carefully
             return ParsedCommand(
                 action="unknown",
                 target_object=None,
