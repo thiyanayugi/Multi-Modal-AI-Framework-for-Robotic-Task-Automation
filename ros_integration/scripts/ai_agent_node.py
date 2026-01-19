@@ -63,35 +63,37 @@ class AIAgentROSNode(Node):
             raise
         
         # Publishers
+        # Create ROS2 publishers for broadcasting agent outputs
         self.action_pub = self.create_publisher(
             String,
-            '/ai_agent/action_plan',
+            '/ai_agent/action_plan',  # Publish generated action plans
             10
         )
         
         self.target_pose_pub = self.create_publisher(
             Pose,
-            '/ai_agent/target_pose',
+            '/ai_agent/target_pose',  # Publish target poses for robot control
             10
         )
         
         self.status_pub = self.create_publisher(
             String,
-            '/ai_agent/status',
+            '/ai_agent/status',  # Publish processing status updates
             10
         )
         
         # Subscribers
+        # Create ROS2 subscribers for receiving inputs
         self.command_sub = self.create_subscription(
             String,
-            '/ai_agent/command',
+            '/ai_agent/command',  # Subscribe to natural language commands
             self.command_callback,
             10
         )
         
         self.image_sub = self.create_subscription(
             Image,
-            '/robot_arm/camera/image_raw',
+            '/robot_arm/camera/image_raw',  # Subscribe to camera feed
             self.image_callback,
             10
         )
