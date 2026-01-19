@@ -66,10 +66,12 @@ class VisionModule:
             self.model = CLIPModel.from_pretrained(model_name).to(self.device)
             self.processor = CLIPProcessor.from_pretrained(model_name)
             
-            # Set model to evaluation mode to disable dropout and batch normalization training behavior
+            # Set model to evaluation mode
+            # Disables dropout and batch normalization training behavior
+            # This ensures consistent, deterministic inference
             self.model.eval()
             
-            logger.info("VisionModule initialized successfully")
+            logger.info(f"✓ VisionModule initialized successfully on {self.device}")
         except Exception as e:
             logger.error(f"Failed to initialize VisionModule: {e}")
             raise RuntimeError(f"VisionModule initialization failed: {e}")
