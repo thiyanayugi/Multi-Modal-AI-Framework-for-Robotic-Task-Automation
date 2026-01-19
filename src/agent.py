@@ -230,24 +230,21 @@ class RoboticAgent:
                 full_context.update(visual_context)
             
             # Step 2: Parse command
+            # Extract structured information (action, target, destination) from natural language
             parsed_command = self.language_module.parse_command(command, full_context)
-            logger.info(f"Parsed command: action={parsed_command.action}, "
-                       f"target={parsed_command.target_object}")
+            logger.info(f"Parsed: action={parsed_command.action}, target={parsed_command.target_object}, "
+                       f"confidence={parsed_command.confidence:.2f}")
             
             # Step 3: Retrieve relevant knowledge
-            # RAG system provides domain-specific manipulation strategies
+            # Query RAG system for manipulation strategies related to this task
             retrieved_knowledge = []
-            if parsed_command.action != "unknown":
-                # Build retrieval query
-                # Combine action, target object, and constraints for semantic search
-                query_parts = [parsed_command.action]
-                if parsed_command.target_object:
-                    query_parts.append(parsed_command.target_object)
+            if self.rag_module:
+                # Construct query from parsed command components
+                # Combine action, target, and constraints for comprehensive search
+                retrieval_query = f"{parsed_command.action} {parsed_command.target_object or ''}"
                 if parsed_command.constraints:
-                    # Limit to first 2 constraints to keep query focused
-                    query_parts.extend(parsed_command.constraints[:2])
+                    retrieval_query += f" {' '.join(parsed_command.constraints)}"
                 
-                retrieval_query = " ".join(query_parts)
                 retrieved_knowledge = self.rag_module.retrieve(retrieval_query, top_k=3)
                 logger.info(f"Retrieved {len(retrieved_knowledge)} knowledge entries")
             
