@@ -44,38 +44,49 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Create workspace
+# Standard ROS2 workspace structure with src directory
 RUN mkdir -p /root/ros2_ws/src
 WORKDIR /root/ros2_ws
 
 # Copy AI Agent Framework
+# Copy entire project into the workspace
 COPY . /root/ros2_ws/src/ai-framework/
 
 # Install Python dependencies
+# AI/ML packages for vision, language, and RAG modules
 RUN pip3 install --no-cache-dir -r /root/ros2_ws/src/ai-framework/requirements.txt
 
 # Create symbolic link for ROS package
+# Link ros_integration directory to standard ROS package name
 RUN ln -s /root/ros2_ws/src/ai-framework/ros_integration /root/ros2_ws/src/ai_agent_ros
 
 # Initialize rosdep (if not already initialized)
+# rosdep manages ROS package dependencies
 RUN rosdep update || true
 
 # Install ROS dependencies
+# Resolve and install all ROS package dependencies
 RUN cd /root/ros2_ws && \
     . /opt/ros/${ROS_DISTRO}/setup.sh && \
     rosdep install --from-paths src --ignore-src -r -y || true
 
 # Build the workspace
+# Compile all ROS2 packages with symlink-install for faster development
 RUN cd /root/ros2_ws && \
     . /opt/ros/${ROS_DISTRO}/setup.sh && \
     colcon build --symlink-install
 
 # Setup entrypoint
+# Custom entrypoint script sources ROS2 environment before executing commands
 COPY ros_integration/docker/ros_entrypoint.sh /ros_entrypoint.sh
-RUN chmod +x /ros_entrypoint.sh || echo "#!/bin/bash\nset -e\nsource /opt/ros/${ROS_DISTRO}/setup.bash\nsource /root/ros2_ws/install/setup.bash\nexec \"\$@\"" > /ros_entrypoint.sh && chmod +x /ros_entrypoint.sh
+RUN chmod +x /ros_entrypoint.sh || echo "#!/bin/bash\nset -e\nsource /opt/ros/${ROS_DISTRO}/setup.bash\nsource /root/ros2_ws/install/setup.bash\nexec \"$@\"" > /ros_entrypoint.sh && chmod +x /ros_entrypoint.sh
 
 # Source ROS2 setup in bashrc
+# Automatically source ROS2 environment in interactive shells
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc && \
     echo "source /root/ros2_ws/install/setup.bash" >> ~/.bashrc
 
+# Set entrypoint and default command
 ENTRYPOINT ["/ros_entrypoint.sh"]
 CMD ["bash"]
+
