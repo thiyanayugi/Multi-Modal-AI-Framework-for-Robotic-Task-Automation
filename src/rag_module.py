@@ -371,25 +371,36 @@ class RAGModule:
             Dictionary with collection statistics
         """
         try:
+            # Get collection count
+            # Total number of documents in the knowledge base
             count = self.collection.count()
             
+            # Get sample documents
+            # Retrieve a few entries for preview/debugging
+            sample_size = min(5, count)
+            if count > 0:
+                results = self.collection.peek(limit=sample_size)
+                sample_docs = results.get("documents", [])
+            else:
+                sample_docs = []
+            
+            # Compile statistics
+            # Provide overview of knowledge base contents
             stats = {
                 "total_documents": count,
                 "collection_name": self.collection.name,
-                "metadata": self.collection.metadata
+                "sample_documents": sample_docs[:3],  # Show first 3 for brevity
+                "embedding_model": str(self.embedding_model)
             }
-            
-            # Get sample metadata if documents exist
-            if count > 0:
-                sample = self.collection.get(limit=1)
-                if sample["metadatas"]:
-                    stats["sample_metadata_keys"] = list(sample["metadatas"][0].keys())
             
             return stats
             
         except Exception as e:
             logger.error(f"Failed to get collection stats: {e}")
-            return {"error": str(e)}
+            return {
+                "total_documents": 0,
+                "error": str(e)
+            }
     
     def clear_collection(self) -> None:
         """
