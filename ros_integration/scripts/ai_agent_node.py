@@ -129,12 +129,14 @@ class AIAgentROSNode(Node):
         self.get_logger().info(f"{'='*60}")
         
         # Publish status
+        # Inform subscribers that command processing has started
         status_msg = String()
         status_msg.data = "Processing command..."
         self.status_pub.publish(status_msg)
         
         try:
             # Process command with AI agent
+            # Use visual context if available for multimodal understanding
             if self.latest_image is not None:
                 self.get_logger().info("Using visual context from camera")
                 result = self.agent.process_task(command, image=self.latest_image)
