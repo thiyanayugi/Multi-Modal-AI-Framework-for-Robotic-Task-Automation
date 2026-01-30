@@ -1,3 +1,7 @@
+"""
+ai_agent_node module.
+"""
+
 #!/usr/bin/env python3
 """
 ROS2 node that bridges the AI Agent Framework with ROS2.
