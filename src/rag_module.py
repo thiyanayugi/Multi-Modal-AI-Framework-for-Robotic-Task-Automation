@@ -39,16 +39,16 @@ logger = logging.getLogger(__name__)
 class RAGModule:
     """
     Retrieval-Augmented Generation module using ChromaDB.
-    
+
     Provides semantic search over a knowledge base of robotic manipulation
     strategies and procedures using vector embeddings and similarity search.
-    
+
     The module enables:
     - Storage of domain-specific knowledge with metadata
     - Semantic retrieval using natural language queries
     - Batch knowledge loading from JSON files
     - Metadata-based filtering for targeted retrieval
-    
+
     Example:
         >>> rag = RAGModule(collection_name="robot_knowledge")
         >>> # Add knowledge entry
@@ -56,13 +56,13 @@ class RAGModule:
         ...     "When grasping blocks, approach from the top with 50% grip force.",
         ...     metadata={"category": "grasping", "object": "block"}
         ... )
-        >>> 
+        >>>
         >>> # Retrieve relevant knowledge
         >>> results = rag.retrieve("how to pick up a block", top_k=3)
         >>> print(results[0]["content"])  # "When grasping blocks, approach from..."
         >>> print(results[0]["score"])  # 0.92
     """
-    
+
     def __init__(
         self,
         collection_name: str = "robotic_knowledge",
@@ -71,12 +71,12 @@ class RAGModule:
     ):
         """
         Initialize the RAGModule with ChromaDB and sentence transformers.
-        
+
         Args:
             collection_name: Name of the ChromaDB collection
             persist_directory: Directory to persist the database (None for in-memory)
             embedding_model: Sentence transformer model for embeddings
-        
+
         Raises:
             RuntimeError: If initialization fails
         """
@@ -85,11 +85,11 @@ class RAGModule:
             # Sentence transformers convert text to dense vectors for semantic search
             logger.info(f"Loading embedding model: {embedding_model}")
             self.embedding_model = SentenceTransformer(embedding_model)
-            
+
             # Setup ChromaDB
             # Use persistent storage to maintain knowledge across sessions
             persist_dir = persist_directory or os.getenv("CHROMA_PERSIST_DIRECTORY", "./chroma_db")
-            
+
             # Create persistent client with telemetry disabled for privacy
             self.client = chromadb.PersistentClient(
                 path=persist_dir,
@@ -98,21 +98,21 @@ class RAGModule:
                     allow_reset=True  # Allow collection reset for testing
                 )
             )
-            
+
             # Get or create collection
             # Collections store embeddings and metadata for efficient retrieval
             self.collection = self.client.get_or_create_collection(
                 name=collection_name,
                 metadata={"description": "Robotic manipulation knowledge base"}
             )
-            
+
             logger.info(f"RAGModule initialized with collection '{collection_name}' "
                        f"({self.collection.count()} documents)")
-            
+
         except Exception as e:
             logger.error(f"Failed to initialize RAGModule: {e}")
             raise RuntimeError(f"RAGModule initialization failed: {e}")
-    
+
     def add_knowledge(
         self,
         content: str,
@@ -121,15 +121,15 @@ class RAGModule:
     ) -> str:
         """
         Add a knowledge entry to the database.
-        
+
         Args:
             content: Text content of the knowledge entry
             metadata: Optional metadata (category, tags, etc.)
             doc_id: Optional document ID (generated if not provided)
-        
+
         Returns:
             Document ID of the added entry
-        
+
         Raises:
             ValueError: If content is empty
             RuntimeError: If addition fails
@@ -137,20 +137,20 @@ class RAGModule:
         try:
             if not content or not content.strip():
                 raise ValueError("Content cannot be empty")
-            
+
             # Generate ID if not provided
             # Use UUID for unique, collision-free identifiers
             doc_id = doc_id or str(uuid.uuid4())
-            
+
             # Generate embedding
             # Convert text to dense vector representation for semantic search
             embedding = self.embedding_model.encode(content).tolist()
-            
+
             # Prepare metadata
             # Add content length for potential filtering or analysis
             meta = metadata or {}
             meta["content_length"] = len(content)
-            
+
             # Add to collection
             # Store document with its embedding and metadata in ChromaDB
             self.collection.add(
@@ -159,27 +159,27 @@ class RAGModule:
                 documents=[content],
                 metadatas=[meta]
             )
-            
+
             logger.info(f"Added knowledge entry: {doc_id}")
             return doc_id
-            
+
         except Exception as e:
             logger.error(f"Failed to add knowledge: {e}")
             raise RuntimeError(f"Knowledge addition failed: {e}")
-    
+
     def add_knowledge_batch(
         self,
         entries: List[Dict[str, Any]]
     ) -> List[str]:
         """
         Add multiple knowledge entries in batch.
-        
+
         Args:
             entries: List of dicts with 'content', optional 'metadata' and 'id'
-        
+
         Returns:
             List of document IDs
-        
+
         Raises:
             ValueError: If entries is empty or invalid
             RuntimeError: If batch addition fails
@@ -187,13 +187,13 @@ class RAGModule:
         try:
             if not entries:
                 raise ValueError("Entries list cannot be empty")
-            
+
             ids = []
             embeddings = []
             documents = []
             embeddings_list = []
             metadatas = []
-            
+
             # Process each entry
             # Generate embeddings and prepare metadata for all entries
             for entry in entries:
@@ -201,23 +201,23 @@ class RAGModule:
                 if not content or not content.strip():
                     logger.warning("Skipping empty content in batch")
                     continue
-                
+
                 # Generate unique ID if not provided
                 doc_id = entry.get("id", str(uuid.uuid4()))
                 ids.append(doc_id)
-                
+
                 # Store document content
                 documents.append(content)
-                
+
                 # Generate embedding for semantic search
                 embedding = self.embedding_model.encode(content).tolist()
                 embeddings_list.append(embedding)
-                
+
                 # Prepare metadata with content length
                 meta = entry.get("metadata", {})
                 meta["content_length"] = len(content)
                 metadatas.append(meta)
-            
+
             # Batch add to collection
             # Single ChromaDB operation is much faster than individual inserts
             self.collection.add(
@@ -226,14 +226,14 @@ class RAGModule:
                 documents=documents,
                 metadatas=metadatas
             )
-            
+
             logger.info(f"Added {len(ids)} knowledge entries in batch")
             return ids
-            
+
         except Exception as e:
             logger.error(f"Failed to add knowledge batch: {e}")
             raise RuntimeError(f"Batch addition failed: {e}")
-    
+
     def retrieve(
         self,
         query: str,
@@ -242,15 +242,15 @@ class RAGModule:
     ) -> List[Dict[str, Any]]:
         """
         Retrieve relevant knowledge entries using semantic search.
-        
+
         Args:
             query: Search query text
             top_k: Number of top results to return
             filter_metadata: Optional metadata filters
-        
+
         Returns:
             List of dicts with 'content', 'metadata', 'score', and 'id'
-        
+
         Raises:
             ValueError: If query is empty or top_k is invalid
             RuntimeError: If retrieval fails
@@ -258,14 +258,14 @@ class RAGModule:
         try:
             if not query or not query.strip():
                 raise ValueError("Query cannot be empty")
-            
+
             if top_k < 1:
                 raise ValueError("top_k must be at least 1")
-            
+
             # Generate query embedding
             # Convert text query to vector representation for similarity search
             query_embedding = self.embedding_model.encode(query).tolist()
-            
+
             # Query collection
             # ChromaDB uses cosine similarity to find most relevant documents
             results = self.collection.query(
@@ -273,7 +273,7 @@ class RAGModule:
                 n_results=min(top_k, self.collection.count()),  # Don't request more than available
                 where=filter_metadata  # Optional metadata filtering
             )
-            
+
             # Format results
             # Convert ChromaDB response to standardized dictionary format
             retrieved = []
@@ -287,18 +287,18 @@ class RAGModule:
                         # Higher score = more similar
                         "score": 1 - results["distances"][0][i] if results["distances"] else 1.0
                     })
-            
+
             logger.info(f"Retrieved {len(retrieved)} documents for query: '{query[:50]}...'")
             return retrieved
-            
+
         except Exception as e:
             logger.error(f"Failed to retrieve knowledge: {e}")
             raise RuntimeError(f"Knowledge retrieval failed: {e}")
-    
+
     def load_knowledge_from_file(self, file_path: str) -> int:
         """
         Load knowledge entries from a JSON file.
-        
+
         Expected JSON format:
         [
             {
@@ -308,13 +308,13 @@ class RAGModule:
             },
             ...
         ]
-        
+
         Args:
             file_path: Path to JSON file
-        
+
         Returns:
             Number of entries loaded
-        
+
         Raises:
             FileNotFoundError: If file doesn't exist
             ValueError: If JSON format is invalid
@@ -323,17 +323,17 @@ class RAGModule:
         try:
             if not os.path.exists(file_path):
                 raise FileNotFoundError(f"Knowledge base file not found: {file_path}")
-            
+
             # Load JSON file
             # Expected format: list of objects with 'content' and optional 'metadata' fields
             with open(file_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            
+
             # Validate format
             # Ensure data is a list of knowledge entries
             if not isinstance(data, list):
                 raise ValueError("Knowledge base file must contain a JSON array")
-            
+
             # Process entries
             # Convert JSON objects to the format expected by add_knowledge_batch
             entries = []
@@ -345,14 +345,14 @@ class RAGModule:
                     entries.append({"content": item})
                 else:
                     logger.warning(f"Skipping invalid entry: {item}")
-            
+
             # Batch add all entries
             # More efficient than adding one at a time
             count = self.add_knowledge_batch(entries)
             logger.info(f"Loaded {count} entries from {file_path}")
-            
+
             return count
-            
+
         except FileNotFoundError:
             # Re-raise file not found errors for caller to handle
             raise
@@ -362,11 +362,11 @@ class RAGModule:
         except Exception as e:
             logger.error(f"Failed to load knowledge base: {e}")
             raise RuntimeError(f"Knowledge base loading failed: {e}")
-    
+
     def get_collection_stats(self) -> Dict[str, Any]:
         """
         Get statistics about the knowledge base.
-        
+
         Returns:
             Dictionary with collection statistics
         """
@@ -374,7 +374,7 @@ class RAGModule:
             # Get collection count
             # Total number of documents in the knowledge base
             count = self.collection.count()
-            
+
             # Get sample documents
             # Retrieve a few entries for preview/debugging
             sample_size = min(5, count)
@@ -383,7 +383,7 @@ class RAGModule:
                 sample_docs = results.get("documents", [])
             else:
                 sample_docs = []
-            
+
             # Compile statistics
             # Provide overview of knowledge base contents
             stats = {
@@ -392,20 +392,20 @@ class RAGModule:
                 "sample_documents": sample_docs[:3],  # Show first 3 for brevity
                 "embedding_model": str(self.embedding_model)
             }
-            
+
             return stats
-            
+
         except Exception as e:
             logger.error(f"Failed to get collection stats: {e}")
             return {
                 "total_documents": 0,
                 "error": str(e)
             }
-    
+
     def clear_collection(self) -> None:
         """
         Clear all documents from the collection.
-        
+
         Warning: This operation cannot be undone.
         """
         try:
@@ -413,7 +413,7 @@ class RAGModule:
             # This removes all documents and embeddings from the database
             self.client.delete_collection(name=self.collection.name)
             logger.info(f"Deleted collection '{self.collection.name}'")
-            
+
             # Recreate the collection
             # Start fresh with an empty collection using the same configuration
             self.collection = self.client.create_collection(
@@ -421,11 +421,11 @@ class RAGModule:
                 metadata={"description": "Robotic manipulation knowledge base"}
             )
             logger.info(f"Recreated empty collection '{self.collection.name}'")
-            
+
         except Exception as e:
             logger.error(f"Failed to clear collection: {e}")
             raise RuntimeError(f"Collection clearing failed: {e}")
-    
+
     def search_by_metadata(
         self,
         metadata_filter: Dict[str, Any],
@@ -433,11 +433,11 @@ class RAGModule:
     ) -> List[Dict[str, Any]]:
         """
         Search documents by metadata filters.
-        
+
         Args:
             metadata_filter: Metadata conditions to filter by
             limit: Maximum number of results
-        
+
         Returns:
             List of matching documents
         """
@@ -446,7 +446,7 @@ class RAGModule:
                 where=metadata_filter,
                 limit=limit
             )
-            
+
             documents = []
             if results["ids"]:
                 for i, doc_id in enumerate(results["ids"]):
@@ -455,10 +455,10 @@ class RAGModule:
                         "content": results["documents"][i],
                         "metadata": results["metadatas"][i]
                     })
-            
+
             logger.info(f"Found {len(documents)} documents matching metadata filter")
             return documents
-            
+
         except Exception as e:
             logger.error(f"Failed to search by metadata: {e}")
             return []
