@@ -9,6 +9,7 @@
   },
   {
     "content": "For placement operations, descend slowly at 20% speed when within 5cm of the target surface. Verify contact before releasing the gripper to prevent dropping.",
+# Check conditions
     "metadata": {
       "category": "placement",
       "difficulty": "basic"
